@@ -1,0 +1,21 @@
+## Interface: 10200
+## Author: Cubelicious
+## Title: Threaticus
+## Notes:
+## Version: v1
+## X-Category: PvP/Battlegrounds
+## SavedVariables: ThreaticusDB
+
+libs\LibStub\LibStub.lua
+libs\CallbackHandler-1.0\CallbackHandler-1.0.xml
+libs\AceDB-3.0\AceDB-3.0.xml
+libs\AceDBOptions-3.0\AceDBOptions-3.0.xml
+libs\AceGUI-3.0\AceGUI-3.0.xml
+libs\AceConfig-3.0\AceConfig-3.0.xml
+libs\LibSharedMedia-3.0\lib.xml
+libs\AceGUI-3.0-SharedMediaWidgets\widget.xml
+
+SpellData.lua
+Options.lua
+Threaticus.lua
+
