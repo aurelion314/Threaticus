@@ -1,2 +1,4 @@
-# TeamfightCounter
-TeamfightCounter addon for WoW
+# Threaticus
+Threaticus addon for WoW
+
+Indicates how buffed a player is.
