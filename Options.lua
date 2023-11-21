@@ -2,7 +2,7 @@ local _, addon = ...
 
 -- Generic get and set functions
 local function getOption(info)
-    local setting = ThreaticusDB.profile
+    local setting = ThreaticusDB.settings
     for i = 1, #info - 1 do  -- Start from 1 as the root name is not included
         setting = setting[info[i]]
     end
@@ -10,7 +10,7 @@ local function getOption(info)
 end
 
 local function setOption(info, value)
-    local setting = ThreaticusDB.profile
+    local setting = ThreaticusDB.settings
     for i = 1, #info - 1 do  -- Start from 1 as the root name is not included
         setting = setting[info[i]]
     end
@@ -120,13 +120,9 @@ addon.options = {
 
 
 addon.defaultSettings = {
-    profile = {
-        damageIndicator = { xOffset = -20, yOffset = 25 },
-        spellReductionIndicator = { xOffset = 5, yOffset = 25 },
-        physicalReductionIndicator = { xOffset = 20, yOffset = 25 },
-        unknownSpells = {},
-        ignoredSpells = {},
-        modifierSpells = {},
-        onAllies = true,
-    }
+    damageIndicator = { xOffset = -20, yOffset = 25 },
+    spellReductionIndicator = { xOffset = 5, yOffset = 25 },
+    physicalReductionIndicator = { xOffset = 20, yOffset = 25 },
+    onAllies = true,
+    showDebug = true,
 }

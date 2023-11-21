@@ -7,7 +7,7 @@ addon.frame:RegisterEvent("PLAYER_LOGIN")
 
 ---------- Helper functions ------
 function addon:Debug(...)
-    if addon.settings.showDebug then
+    if settings.showDebug then
         print('Threaticus Debug:', ...)
     end
 end
@@ -87,18 +87,18 @@ function addon:ScanUnitBuffs(unitID)
 
         -- Testing
         if name then
-            if not ThreaticusDB.profile.unknownSpells[spellId] and not addon.knownSpells[spellId] and not addon.defaultSpells[spellId] then
+            if not ThreaticusDB.unknownSpells[spellId] and not addon.knownSpells[spellId] and not addon.defaultSpells[spellId] then
                 -- Add to spell list for review. This will be used to populate the defaultSpells table
                 local spellDescription = GetSpellDescription(spellId)
                 -- If spell description is blank, call GetSpellTooltip
                 if spellDescription == "" then
                     spellDescription = addon:GetSpellTooltip(spellId)
                 end
-                ThreaticusDB.profile.unknownSpells[spellId] = { name = name, description = spellDescription }
-                print("New buff found: " .. name .. " (ID: " .. spellId .. ")")
-            elseif ThreaticusDB.profile.unknownSpells[spellId] and (addon.knownSpells[spellId] or addon.defaultSpells[spellId]) then
+                ThreaticusDB.unknownSpells[spellId] = { name = name, description = spellDescription }
+                addon:Debug("New buff found: " .. name .. " (ID: " .. spellId .. ")")
+            elseif ThreaticusDB.unknownSpells[spellId] and (addon.knownSpells[spellId] or addon.defaultSpells[spellId]) then
                 -- It is already in known. It shouldn't be in spell list. 
-                ThreaticusDB.profile.unknownSpells[spellId] = nil
+                ThreaticusDB.unknownSpells[spellId] = nil
             end 
         end
         i = i + 1
@@ -107,10 +107,10 @@ function addon:ScanUnitBuffs(unitID)
     local totalDamageModifier = self:CalculateTotalDamageModifier(relevantBuffs)
     -- Get name of unit
     local name = UnitName(unitID)
-    print("Total damage modifier: " .. totalDamageModifier .. " for " .. name)
+    addon:Debug("Total damage modifier: " .. totalDamageModifier .. " for " .. name)
     local totalPhysicalModifier, totalMagicalModifier = self:CalculateDefensiveModifiers(relevantBuffs)
-    print("Total physical defensive modifier: " .. totalPhysicalModifier)
-    print("Total magical defensive modifier: " .. totalMagicalModifier)
+    addon:Debug("Total physical defensive modifier: " .. totalPhysicalModifier)
+    addon:Debug("Total magical defensive modifier: " .. totalMagicalModifier)
 
     self:DrawOnPlate(unitID, totalDamageModifier, totalPhysicalModifier, totalMagicalModifier)
 end
@@ -229,19 +229,7 @@ function addon:UNIT_AURA(unitID)
     end
 end
 
-function addon:ApplyDefaultSettings()
-    for key, value in pairs(addon.defaultSettings) do
-        if ThreaticusDB.profile[key] == nil then
-            ThreaticusDB.profile[key] = value
-        elseif type(value) == "table" then
-            for subKey, subValue in pairs(value) do
-                if ThreaticusDB.profile[key][subKey] == nil then
-                    ThreaticusDB.profile[key][subKey] = subValue
-                end
-            end
-        end
-    end
-end
+
 
 function addon:refreshView()
     -- get all visible nameplates
@@ -257,28 +245,35 @@ function addon:refreshView()
     end
 end
 
+function addon:ApplyDefaultSettings()
+    -- Set default settings
+    ThreaticusDB.settings = ThreaticusDB.settings or {}
+    settings = ThreaticusDB.settings
 
-function addon:OnProfileChanged()
-    -- addon:ApplyDefaultSettings()
-    
-    -- Loop nameplates and refresh them
+    for key, value in pairs(addon.defaultSettings) do
+        if settings[key] == nil then
+            settings[key] = value
+        elseif type(value) == "table" then
+            for subKey, subValue in pairs(value) do
+                if settings[key][subKey] == nil then
+                    settings[key][subKey] = subValue
+                end
+            end
+        end
+    end
+    ThreaticusDB.unknownSpells = ThreaticusDB.unknownSpells or {}
+    ThreaticusDB.ignoredSpells = ThreaticusDB.ignoredSpells or {}
+    ThreaticusDB.modifierSpells = ThreaticusDB.modifierSpells or {}
 end
 
--- Initialization function
+-- Initialization
 local function Initialize()
+    ThreaticusDB = ThreaticusDB or {}
+    addon:ApplyDefaultSettings()
+    
+    -- Init options
     local config = LibStub("AceConfig-3.0")
     local dialog = LibStub("AceConfigDialog-3.0")
-
-    -- Init profile
-    ThreaticusDB = LibStub("AceDB-3.0"):New("ThreaticusDB", addon.defaultSettings, true)
-    -- ThreaticusDB.RegisterCallback(addon, "OnProfileChanged", "OnProfileChanged")
-    -- ThreaticusDB.RegisterCallback(addon, "OnProfileCopied", "OnProfileChanged")
-    -- ThreaticusDB.RegisterCallback(addon, "OnProfileReset", "OnProfileChanged")
-    addon:OnProfileChanged() -- Set up default values
-    settings = ThreaticusDB.profile
-
-    -- Init options
-
     config:RegisterOptionsTable("ThreaticusOptions", addon.options)
     addon.optionsFrame = dialog:AddToBlizOptions("ThreaticusOptions", "Threaticus")
     -- Slash command
@@ -289,11 +284,11 @@ local function Initialize()
     end
 
     -- While testing, do a quick check to ensure spells list doesn't contain anything already in SpellData
-    -- for spellId, spellData in pairs(ThreaticusDB.profile.unknownSpells) do
-    --     if addon.defaultSpells[spellId] or addon.knownSpells[spellId] then
-    --         ThreaticusDB.profile.unknownSpells[spellId] = nil
-    --     end
-    -- end
+    for spellId, spellData in pairs(ThreaticusDB.unknownSpells) do
+        if addon.defaultSpells[spellId] or addon.knownSpells[spellId] then
+            ThreaticusDB.unknownSpells[spellId] = nil
+        end
+    end
  
     -- Initialization logic here (e.g., setting up saved variables, default settings)
     addon.frame:RegisterEvent('NAME_PLATE_UNIT_ADDED')

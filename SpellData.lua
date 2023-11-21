@@ -189,7 +189,7 @@ addon.defaultSpells = {
     },
     [315496] = {
         name = "Slice and Dice",
-        damageMultiplier = 1.4, -- Significant increase in attack speed likely leads to a substantial increase in damage output.
+        damageMultiplier = 1.05, -- Significant increase in attack speed likely leads to a substantial increase in damage output.
     },
 
     [108211] = {
