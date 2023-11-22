@@ -1,7 +1,8 @@
 local addonName, addon = ...
 
 -- Default list to watch for. These are spells with modifiers that we need to account for.
-addon.defaultSpells = {
+-- Possible modifiers are: damageAddition, damageMultiplier, reductionModifier, magicReductionModifier, physicalReductionModifier
+addon.defaultTracked = {
     [418563] = { 
         name = "WoW Anniverseray", 
     },
@@ -331,15 +332,294 @@ addon.defaultSpells = {
         name = "Arcane Tempo",
         damageMultiplier = 1.02,
     },
-
-
+    [408340] = {
+        name = "Shadows of the Predator",
+        damageAddition = 0.01,
+    },
     
+    [10060] = {
+        name = "Power Infusion",
+        damageAddition = 1.2, -- 20% haste increase could imply damage increase
+    },
 
+    [264173] = {
+        name = "Demonic Core",
+        damageMultiplier = 1.1, -- 100% reduction in cast time might imply a damage increase
+    },
     
+    [1022] = {
+        name = "Blessing of Protection",
+        physicalReductionModifier = 1.0, -- Immunity to physical damage
+    },
+    [642] = {
+        name = "Divine Shield",
+        reductionModifier = 1.0, -- Immunity to all damage
+    },
+
+    [47585] = {
+        name = "Dispersion",
+        reductionModifier = 0.25, -- 75% damage reduction
+    },
+    
+    [22812] = {
+        name = "Barkskin",
+        reductionModifier = 0.2, -- 20% damage reduction
+    },
 }
 
 -- These are all known spells, even if they have no modifiers. 
-addon.knownSpells = {
+addon.defaultIgnored = {
+    [382093] = { 
+        name = "Alchemically Inspired", 
+        -- Unclear effect, no modifiers estimated
+    },
+    [139448] = {
+        name = "Clutch of Ji-Kun",
+        -- No combat modifiers (Mount)
+    },
+    [207203] = {
+        name = "Frost Shield",
+        -- Unclear effect, possibly a reductionModifier but no specific data
+    },
+    [383492] = {
+        name = "Wildfire",
+        -- Unclear effect, no modifiers estimated
+    },
+    [390787] = {
+        name = "Weal and Woe",
+        -- Unclear effect, no modifiers estimated
+    },
+    [157644] = {
+        name = "Pyrotechnics",
+        -- Unclear effect, possibly related to damage but no specifics
+    },
+    [2584] = {
+        name = "Waiting to Resurrect",
+        -- No combat modifiers
+    },
+    [343648] = {
+        name = "Solstice",
+        -- Unclear effect, no modifiers estimated
+    },
+    [264571] = {
+        name = "Nightfall",
+        -- Unclear effect, no modifiers estimated
+    },
+    [201846] = {
+        name = "Stormbringer",
+        -- Effect on cooldown reset, not directly a damage modifier
+    },
+    [386237] = {
+        name = "Fade to Nothing",
+        -- Unclear effect, no modifiers estimated
+    },
+    [353646] = {
+        name = "Fel Obelisk",
+        -- Unclear effect, no modifiers estimated
+    },
+    [373276] = {
+        name = "Idol of Yogg-Saron",
+        -- No combat modifiers
+    },
+    [405225] = {
+        name = "Stone Breaker",
+        -- Unclear effect, no modifiers estimated
+    },
+    [281036] = {
+        name = "Dire Beast",
+        -- Unclear effect, possibly related to summoning but no specific damage modifier
+    },
+    [375986] = {
+        name = "Primordial Wave",
+        -- Unclear effect, no modifiers estimated
+    },
+    [342246] = {
+        name = "Alter Time",
+        -- No direct combat modifiers
+    },
+    [1044] = {
+        name = "Blessing of Freedom",
+        -- No damage or defense modifiers, immunity to movement impairing effects
+    },
+    [418744] = {
+        name = "Dreamsurge Learnings",
+        -- No combat modifiers, experience and reputation gains
+    },
+    [401394] = {
+        name = "Unstable Flames",
+        -- Unclear effect, no modifiers estimated
+    },
+    [383637] = {
+        name = "Fiery Rush",
+        -- Unclear effect, no modifiers estimated
+    },
+    [381752] = {
+        name = "Blessing of the Bronze",
+        -- Unclear effect, no modifiers estimated
+    },
+    [184662] = {
+        name = "Shield of Vengeance",
+    },
+    [371348] = {
+        name = "Elemental Chaos: Fire",
+        -- Unclear effect, no modifiers estimated
+    },
+    [385787] = {
+        name = "Matted Fur",
+        -- Unclear effect, no modifiers estimated
+    },
+    [389387] = {
+        name = "Awakened Faeline",
+        -- Unclear effect, no modifiers estimated
+    },
+    [216528] = {
+        name = "Waterspeaker's Blessing",
+        -- Unclear effect, no modifiers estimated
+    },
+    [366155] = {
+        name = "Reversion",
+        -- Unclear effect, no modifiers estimated
+    },
+    [305497] = {
+        name = "Thorns",
+        -- Damage reflection, no clear damage reduction or increase modifiers
+    },
+    [111400] = {
+        name = "Burning Rush",
+        -- Unclear effect, no modifiers estimated
+    },
+    [391688] = {
+        name = "Dancing Blades",
+        -- Unclear effect, no modifiers estimated
+    },
+    [347462] = { 
+        name = "Unbound Chaos", 
+    },
+
+    [44535] = {
+        name = "Spirit Heal",
+        -- No combat modifiers
+    },
+    [368158] = {
+        name = "Zereth Overseer",
+        -- No combat modifiers
+    },
+    [387066] = {
+        name = "Wrath of Consumption",
+        -- Unclear effect, no modifiers estimated
+    },
+    [170347] = {
+        name = "Core Hound",
+        -- No combat modifiers
+    },
+    [73325] = {
+        name = "Leap of Faith",
+        -- No combat modifiers
+    },
+    [198069] = {
+        name = "Power of the Dark Side",
+        -- Unclear effect, no modifiers estimated
+    },
+    [185422] = {
+        name = "Shadow Dance",
+        -- Unclear effect, no modifiers estimated
+    },
+    [274009] = {
+        name = "Voracious",
+        -- Unclear effect, no modifiers estimated
+    },
+    [355897] = {
+        name = "Inner Light",
+        -- Unclear effect, no modifiers estimated
+    },
+    [216338] = {
+        name = "Food",
+        -- No combat modifiers
+    },
+    [355898] = {
+        name = "Inner Shadow",
+        -- Unclear effect, no modifiers estimated
+    },
+    [426672] = {
+        name = "Best Friends with Urctos",
+        -- No combat modifiers
+    },
+    [219788] = {
+        name = "Ossuary",
+        -- Unclear effect, no modifiers estimated
+    },
+    [414664] = {
+        name = "Mass Invisibility",
+        -- No combat modifiers
+    },
+    [216339] = {
+        name = "Drink",
+        -- No combat modifiers
+    },
+    [393969] = {
+        name = "Danse Macabre",
+        -- Unclear effect, no modifiers estimated
+    },
+    [403295] = {
+        name = "Black Attunement",
+        -- No direct combat modifiers, but may affect health
+    },
+    [54149] = {
+        name = "Infusion of Light",
+        -- Unclear effect, no modifiers estimated
+    },
+    [387327] = {
+        name = "Shadow's Bite",
+        -- Unclear effect, no modifiers estimated
+    },
+    [393971] = {
+        name = "Soothing Darkness",
+        -- Unclear effect, no modifiers estimated
+    },
+    [216468] = {
+        name = "Saltwater Potion",
+        -- No combat modifiers
+    },
+    [394738] = {
+        name = "Vicious Sabertooth",
+        -- No combat modifiers
+    },
+    [166646] = {
+        name = "Windwalking",
+        -- No combat modifiers
+    },
+    [186257] = {
+        name = "Aspect of the Cheetah",
+        -- No combat modifiers
+    },
+    [216343] = {
+        name = "Well Fed",
+        -- No combat modifiers
+    },
+    [387334] = {
+        name = "Infurious Legwraps of Possibility",
+        -- Unclear effect, no modifiers estimated
+    },
+    [390145] = {
+        name = "Inner Demon",
+        -- Unclear effect, no modifiers estimated
+    },
+    [389890] = {
+        name = "Tactical Retreat",
+        -- No direct combat modifiers
+    },
+    [401516] = {
+        name = "Ruby Resonance",
+        -- Unclear effect, no modifiers estimated
+    },
+    [262652] = {
+        name = "Forceful Winds",
+        -- Unclear effect, no modifiers estimated
+    },
+    [334320] = {
+        name = "Inevitable Demise",
+        -- Unclear effect, no modifiers estimated
+    },
     [368896] = { 
         name = "Renewed Proto-Drake",
     },
@@ -447,10 +727,7 @@ addon.knownSpells = {
         name = "Highlord's Golden Charger",
         -- This is a mount and does not affect combat stats.
     },
-    [408340] = {
-        name = "Shadows of the Predator",
-        -- No specific damage or defense modifier can be inferred.
-    },
+
     [393959] = {
         name = "Nature's Grace",
         -- Haste increase does not directly translate to a damage or defense modifier.
