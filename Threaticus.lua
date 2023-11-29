@@ -29,6 +29,15 @@ function addon:GetSpellTooltip(spellId)
     return table.concat(tooltipText, "\n")
 end
 
+function addon:GetSpellDescription(spellId)
+    local spellDescription = GetSpellDescription(spellId)
+    -- If spell description is blank, call GetSpellTooltip
+    if spellDescription == "" then
+        spellDescription = addon:GetSpellTooltip(spellId)
+    end
+    return spellDescription
+end
+
 
 function addon:CalculateTotalDamageModifier(relevantBuffs)
     local totalMultiplier = 1.0
@@ -55,20 +64,22 @@ function addon:CalculateDefensiveModifiers(relevantBuffs)
     for _, spellId in ipairs(relevantBuffs) do
         local buffData = ThreaticusDB.trackedSpells[spellId]
 
-        if buffData.physicalReduction then
-            totalPhysicalMultiplier = totalPhysicalMultiplier * (1 - buffData.physicalReduction)
+        if buffData.physicalReductionModifier then
+            totalPhysicalMultiplier = totalPhysicalMultiplier * (1 - buffData.physicalReductionModifier)
         end
-        if buffData.magicalReduction then
-            totalMagicalMultiplier = totalMagicalMultiplier * (1 - buffData.magicalReduction)
+        if buffData.magicReductionModifier then
+            totalMagicalMultiplier = totalMagicalMultiplier * (1 - buffData.magicReductionModifier)
         end
-        if buffData.reductionModifer then
-            totalPhysicalMultiplier = totalPhysicalMultiplier * (1 - buffData.reductionModifer)
-            totalMagicalMultiplier = totalMagicalMultiplier * (1 - buffData.reductionModifer)
+        if buffData.reductionModifier then
+            totalPhysicalMultiplier = totalPhysicalMultiplier * (1 - buffData.reductionModifier)
+            totalMagicalMultiplier = totalMagicalMultiplier * (1 - buffData.reductionModifier)
         end
     end
 
     return totalPhysicalMultiplier, totalMagicalMultiplier
 end
+
+
 
 function addon:ScanUnitBuffs(unitID)
     local relevantBuffs = {}
@@ -90,11 +101,7 @@ function addon:ScanUnitBuffs(unitID)
         if name then
             if not ThreaticusDB.unknownSpells[spellId] and not ThreaticusDB.trackedSpells[spellId] and not ThreaticusDB.ignoredSpells[spellId] then
                 -- Add to spell list for review. This will be used to populate the default table
-                local spellDescription = GetSpellDescription(spellId)
-                -- If spell description is blank, call GetSpellTooltip
-                if spellDescription == "" then
-                    spellDescription = addon:GetSpellTooltip(spellId)
-                end
+                local spellDescription = addon:GetSpellDescription(spellId)
                 ThreaticusDB.unknownSpells[spellId] = { name = name, description = spellDescription }
                 addon:Debug("New buff found: " .. name .. " (ID: " .. spellId .. ")")
             elseif ThreaticusDB.unknownSpells[spellId] and (ThreaticusDB.trackedSpells[spellId] or ThreaticusDB.ignoredSpells[spellId]) then
@@ -129,19 +136,31 @@ function addon:DrawOnPlate(nameplateID, damageModifier, physicalDefensiveModifie
     self:UpdateIndicator(frame, "ThreaticusDamageIndicator", indicatorSize, color, "CENTER", "CENTER", settings.damageIndicator.xOffset, settings.damageIndicator.yOffset, "BlipNormal")
 
     -- Physical Defensive Indicator
-    local physicalDefensiveIndicatorSize = addon:CalculateDefensiveIndicatorSize(physicalDefensiveModifier)
-    local physicalDefensiveColor = self:getDefensiveColor(physicalDefensiveModifier)
-    self:UpdateIndicator(frame, "ThreaticusPhysicalDefensiveIndicator", physicalDefensiveIndicatorSize, physicalDefensiveColor, "CENTER", "CENTER", settings.physicalReductionIndicator.xOffset, settings.physicalReductionIndicator.yOffset, "BlipCombat")
+    if not settings.physicalReductionIndicator.enabled then
+        if frame.ThreaticusPhysicalDefensiveIndicator then
+            frame.ThreaticusPhysicalDefensiveIndicator:Hide()
+        end
+    else
+        local physicalDefensiveIndicatorSize = addon:CalculateDefensiveIndicatorSize(physicalDefensiveModifier)
+        local physicalDefensiveColor = self:getDefensiveColor(physicalDefensiveModifier, ThreaticusDB.settings.physicalReductionIndicator.minValue)
+        self:UpdateIndicator(frame, "ThreaticusPhysicalDefensiveIndicator", physicalDefensiveIndicatorSize, physicalDefensiveColor, "CENTER", "CENTER", settings.physicalReductionIndicator.xOffset, settings.physicalReductionIndicator.yOffset, "Shield")
+    end
 
     -- Magical Defensive Indicator
-    local magicalDefensiveIndicatorSize = addon:CalculateDefensiveIndicatorSize(magicalDefensiveModifier)
-    local magicalDefensiveColor = self:getDefensiveColor(magicalDefensiveModifier)
-    self:UpdateIndicator(frame, "ThreaticusMagicalDefensiveIndicator", magicalDefensiveIndicatorSize, magicalDefensiveColor, "CENTER", "CENTER", settings.spellReductionIndicator.xOffset, settings.spellReductionIndicator.yOffset, "BlipCombatHealer")
+    if not settings.spellReductionIndicator.enabled then
+        if frame.ThreaticusMagicalDefensiveIndicator then
+            frame.ThreaticusMagicalDefensiveIndicator:Hide()
+        end
+    else
+        local magicalDefensiveIndicatorSize = addon:CalculateDefensiveIndicatorSize(magicalDefensiveModifier)
+        local magicalDefensiveColor = self:getDefensiveColor(magicalDefensiveModifier, ThreaticusDB.settings.spellReductionIndicator.minValue)
+        self:UpdateIndicator(frame, "ThreaticusMagicalDefensiveIndicator", magicalDefensiveIndicatorSize, magicalDefensiveColor, "CENTER", "CENTER", settings.spellReductionIndicator.xOffset, settings.spellReductionIndicator.yOffset, "ShieldMagic")
+    end
 end
 
 function addon:UpdateIndicator(frame, indicatorKey, size, color, point1, point2, offsetX, offsetY, textureName)
     if not frame[indicatorKey] then
-        frame[indicatorKey] = CreateFrame("Frame", nil, frame)
+        frame[indicatorKey] = CreateFrame("Frame", nil, frame, "ThreaticusIndicatorTemplate")
         local texture = frame[indicatorKey]:CreateTexture(nil, "BACKGROUND")
         texture:SetAllPoints(frame[indicatorKey])
         texture:SetTexture("Interface\\AddOns\\Threaticus\\Textures\\" .. textureName)
@@ -156,47 +175,101 @@ end
 
 function addon:CalculateDefensiveIndicatorSize(defensiveModifier)
     -- Base size for the indicator
-    local baseSize = 10
+    local baseSize = 9
+    return baseSize -- For now lets leave it static
     -- It should get bigger as it approaches 0, maxing out at 3.0. defensiveModifier is between 0 and 1. 0 being that they are
-    local sizeMultiplier = ((1 - defensiveModifier)) * 2 * baseSize
-    local indicatorSize = baseSize + sizeMultiplier
-    return indicatorSize
+    -- local sizeMultiplier = ((1 - defensiveModifier)) * 2 * baseSize
+    -- local indicatorSize = baseSize + sizeMultiplier
+    -- return indicatorSize
 end
 
 
-function addon:getDefensiveColor(defensiveModifier)
-    -- Transition from light blue (1.0) to dark purple/grey (0)
+function addon:getDefensiveColor_blue(defensiveModifier, minValue)
+    local maxValue = 1
+    -- Ensure defensiveModifier is within the bounds of minValue and maxValue
+    defensiveModifier = math.max(minValue, math.min(defensiveModifier, maxValue))
+
+    -- Normalize defensiveModifier within the range of minValue and maxValue
+    local normalizedModifier = (defensiveModifier - minValue) / (maxValue - minValue)
+
+    -- Transition from light blue (maxValue) to dark purple/grey (minValue)
     local r, g, b
 
-    -- Red component increases as defensiveModifier decreases
-    r = (1 - defensiveModifier) * 0.6 -- Cap red at 0.6 for dark purple/grey
+    -- Red component increases as normalizedModifier decreases
+    r = (1 - normalizedModifier) * 0.6 -- Cap red at 0.6 for dark purple/grey
 
     -- Green component decreases to 0 for both blue and purple/grey
-    g = defensiveModifier * 0.6 -- Green decreases as defense increases
+    g = normalizedModifier * 0.6 -- Green decreases as defense increases
 
     -- Blue component starts high for light blue, decreases but remains for purple/grey
-    b = 0.8 - (1 - defensiveModifier) * 0.2 -- Keeping blue present for purple/grey
+    b = 0.8 - (1 - normalizedModifier) * 0.2 -- Keeping blue present for purple/grey
 
     return {r, g, b, 1}
 end
+
+function addon:getDefensiveColor(defensiveModifier, minValue)
+    local maxValue = 1
+    -- Ensure defensiveModifier is within the bounds of minValue and maxValue
+    defensiveModifier = math.max(minValue, math.min(defensiveModifier, maxValue))
+
+    -- Normalize defensiveModifier within the range of minValue and maxValue
+    local normalizedModifier = (defensiveModifier - minValue) / (maxValue - minValue)
+
+    -- Transition from soft white (maxValue) to dark grey (minValue)
+    -- local greyScaleValue = 0 + (normalizedModifier * 0.8) -- Adjust the range as needed
+    local greyScaleValue = 1 -- Adjust the range as needed
+
+    local alpha = 1 - normalizedModifier * 1 -- Adjust the range as needed
+
+    if ThreaticusDB.settings.testing then
+        alpha = 1
+    end
+
+    return {greyScaleValue, greyScaleValue, greyScaleValue, alpha}
+end
+
 
 
 function addon:getThreatColor(damageModifier)
-    -- Calculate color based on damageModifier
-    local damageModifier = damageModifier + (damageModifier - 1) * 3
-    -- Transition from green (1.0) to red (3.0)
-    local r, g, b = 1, 1, 0
-    if damageModifier <= 2 then
+    -- Calculate color based on damageModifier. Green at minValue, red at maxValue.
+    local maxValue = ThreaticusDB.settings.damageIndicator.maxValue
+    local minValue = 1
+
+    -- Correctly handle the case where maxValue is not greater than minValue
+    if maxValue <= minValue then
+        return {1, 0, 0, 1} -- Return a default color (red) if maxValue is not greater
+    end
+
+    -- Normalize damageModifier within the range of minValue and maxValue
+    local normalizedModifier = (damageModifier - minValue) / (maxValue - minValue)
+
+    -- Transition from green to red through yellow
+    local r, g, b = 0, 1, 0 -- Start with green
+    if normalizedModifier <= 0.5 then
         -- Transition from green to yellow
-        r = (damageModifier - 1) / 1
-        g = 1
+        r = normalizedModifier * 2 -- Increase red to reach yellow
     else
         -- Transition from yellow to red
         r = 1
-        g = 1 - ((damageModifier - 2) / 1)
+        g = 1 - (normalizedModifier - 0.5) * 2 -- Decrease green to reach red
     end
-    b = 0
+
     return {r, g, b, 1}
+end
+
+function addon:clearAllPlates()
+    local nameplates = C_NamePlate.GetNamePlates()
+    for _, nameplate in ipairs(nameplates) do
+        if nameplate.ThreaticusDamageIndicator then
+            nameplate.ThreaticusDamageIndicator:Hide()
+        end
+        if nameplate.ThreaticusPhysicalDefensiveIndicator then
+            nameplate.ThreaticusPhysicalDefensiveIndicator:Hide()
+        end
+        if nameplate.ThreaticusMagicalDefensiveIndicator then
+            nameplate.ThreaticusMagicalDefensiveIndicator:Hide()
+        end
+    end
 end
 
 

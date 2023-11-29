@@ -3,371 +3,673 @@ local addonName, addon = ...
 -- Default list to watch for. These are spells with modifiers that we need to account for.
 -- Possible modifiers are: damageAddition, damageMultiplier, reductionModifier, magicReductionModifier, physicalReductionModifier
 addon.defaultTracked = {
-    [418563] = { 
-        name = "WoW Anniverseray", 
-    },
-    [23456] = {
-        name = "Example Spell",
-        damageAddition = 0.1,
-        damageMultiplier = 1.2,
-        reductionModifier = 0.1,
-        magicReductionModifier = 0.1,
-        physicalReductionModifier = 0.1,
-    },
-    [6673] = {
-        name = "Battle Shout",
-        damageMultiplier = 1.05 -- Estimated
-    },
-    [387336] = {
-        name = "Zone of Focus",
-        reductionModifier = 0.05 -- Estimated
-    },
-
-    [175784] = {
-        name = "Well Fed",
-        damageMultiplier = 1.05 -- Estimated for food buffs
-    },
-
-    [196099] = {
-        name = "Grimoire of Sacrifice",
-        damageMultiplier = 1.1 -- Estimated
-    },
-
-    [11426] = {
-        name = "Ice Barrier",
-        reductionModifier = 0.05 -- Estimated
-    },
-
-    [386196] = {
-        name = "Berserker Stance",
-        damageMultiplier = 1.1, -- Estimated
-        physicalReductionModifier = -0.05 -- Estimated trade-off for increased damage
-    },
-
-    [193358] = {
-        name = "Grand Melee",
-        damageMultiplier = 1.05 -- Estimated
-    },
-
-    [17] = {
-        name = "Power Word: Shield",
-        reductionModifier = 0.1 -- Estimated
-    },
-    [386208] = {
-        name = "Defensive Stance",
-        reductionModifier = 0.1 -- Estimated
-    },
-
-    [13750] = {
-        name = "Adrenaline Rush",
-        damageMultiplier = 1.2 -- Estimated
-    },
-
-    [465] = {
-        name = "Devotion Aura",
-        reductionModifier = 0.03
-    },
-
-    [257622] = {
-        name = "Trick Shots",
-        damageMultiplier = 1.05 -- Estimated based on enhanced damage potential
-    },
-
-    [257946] = {
-        name = "Thrill of the Hunt",
-        damageMultiplier = 1.05 -- Estimated
-    },
-
-    [24858] = {
-        name = "Moonkin Form",
-        damageMultiplier = 1.1,
-        physicalReductionModifier = 0.125 -- Estimated based on armor increase
-    },
-
-    [162264] = {
-        name = "Metamorphosis",
-        damageMultiplier = 1.2 -- Estimated based on enhanced abilities
-    },
-
-    [1126] = {
-        name = "Mark of the Wild",
-        damageMultiplier = 1.03 -- Versatility increase can affect damage
-    },
-
-    [381637] = {
-        name = "Atrophic Poison",
-    },
-
-    [382154] = {
-        name = "Well Fed",
-        damageMultiplier = 1.05 -- Estimated for food buffs
-    },
-
-
-    [371353] = {
-        name = "Elemental Chaos: Frost",
-        damageMultiplier = 1.05 -- Estimated based on versatility increase
-    },
-
-    [260286] = {
-        name = "Tip of the Spear",
-        damageMultiplier = 1.05 -- Estimated based on enhanced damage potential
-    },
-
-    [197625] = {
-        name = "Moonkin Form",
-        damageMultiplier = 1.1, -- Estimated based on damage increase
-        physicalReductionModifier = 0.125 -- Estimated based on armor increase
-    },
-
-
-    [193538] = {
-        name = "Alacrity",
-        damageMultiplier = 1.01 -- Haste increase can affect overall damage
-    },
-
-    [175785] = {
-        name = "Well Fed",
-        damageMultiplier = 1.05 -- Estimated for food buffs
-    },
-
-    [382079] = {
-        name = "Incarnate's Mark of Frost",
-        damageMultiplier = 1.05, -- Assuming a medium amount Critical Strike increase slightly boosts overall damage.
-    },
-
-    [396092] = {
-        name = "Well Fed",
-        damageMultiplier = 1.03, -- Assuming a primary stat increase translates to a moderate damage increase.
-    },
-
-    [264663] = {
-        name = "Predator's Thirst",
-        reductionModifier = 0.1, -- Leech provides self-healing, contributing to effective damage reduction.
-    },
-
-    [5487] = {
-        name = "Bear Form",
-        physicalReductionModifier = 0.3, -- Significant increase in armor suggests a substantial reduction in physical damage.
-    },
-
-    [80353] = {
-        name = "Time Warp",
-        damageMultiplier = 1.3, -- Haste significantly increases overall damage output.
-    },
-
-
-    [374000] = {
-        name = "Iced Phial of Corrupting Rage",
-        damageMultiplier = 1.03, -- Critical Strike increase moderately boosts damage.
-    },
-    [395336] = {
-        name = "Protector of the Pack",
-    },
-    [116267] = {
-        name = "Incanter's Flow",
-        damageMultiplier = 1.02, -- Assuming a moderate variable damage increase.
-    },
-
-    [393438] = {
-        name = "Draconic Augmentation",
-        damageMultiplier = 1.04, -- Slight increase in primary stats leads to a mild damage boost.
-    },
-
-    [374002] = {
-        name = "Corrupting Rage",
-        damageMultiplier = 1.03, -- Similar to Iced Phial of Corrupting Rage.
-    },
-    [2823] = { 
-        name = "Deadly Poison", 
-        damageAddition = 0.03, -- Assuming a constant poison damage over time.
-    },
-
-    [371172] = {
-        name = "Phial of Tepid Versatility",
-        damageMultiplier = 1.02, -- Versatility increases both damage output and damage reduction.
-        reductionModifier = 0.02,
-    },
-    [315496] = {
-        name = "Slice and Dice",
-        damageMultiplier = 1.05, -- Significant increase in attack speed likely leads to a substantial increase in damage output.
-    },
-
-    [108211] = {
-        name = "Leeching Poison",
-    },
-    [381664] = {
-        name = "Amplifying Poison",
-        damageMultiplier = 1.05, -- Considering the potential 35% increased damage from Envenom.
-    },
-
-    [391099] = {
-        name = "Dark Evangelism",
-        damageMultiplier = 1.053, -- Assuming the maximum 5% increase in periodic damage.
-    },
-    [232698] = {
-        name = "Shadowform",
-        damageMultiplier = 1.1, -- 10% increase in spell damage.
-    },
-    [382153] = {
-        name = "Well Fed",
-        damageMultiplier = 1.03, -- Increase in Haste and Versatility translates to a mild boost in damage.
-    },
-
-    [345230] = {
-        name = "Gladiator's Insignia",
-        damageMultiplier = 1.1, -- Brief increase in primary stat suggests a small boost in damage.
-    },
-    [386164] = {
-        name = "Battle Stance",
-        damageMultiplier = 1.03, -- 3% increase in critical strike chance can moderately increase overall damage.
-    },
-
-    [385127] = {
-        name = "Blessing of Dawn",
-        damageMultiplier = 1.2, -- 20% additional increased damage for Holy Power spending ability.
-    },
-
-    [226807] = {
-        name = "Well Fed",
-        damageMultiplier = 1.03, -- Estimated for food buffs
-    },
-        
-    [5217] = {
-        name = "Tiger's Fury",
-        damageMultiplier = 1.15, -- 15% increase in damage for 10 seconds.
-    },
     
-    [356661] = {
-        name = "Chaotic Imprint - Fire",
-        damageMultiplier = 1.1, -- Increases target's damage taken from a school by 10% for 20 sec.
-    },
-    [183435] = {
-        name = "Retribution Aura",
-        damageMultiplier = 1.05, -- 5% increased damage under specific conditions.
-    },
-
-    [287280] = {
-        name = "Glimmer of Light",
-        damageAddition = 0.05,
-    },
-    [260734] = {
-        name = "Master of the Elements",
-        damageMultiplier = 1.1,
-    },
-    [382080] = {
-        name = "Incarnate's Mark of Fire",
-        damageMultiplier = 1.05,
-    },
-
-    [390192] = {
-        name = "Ragefire",
-        damageMultiplier = 1.1,
-    },
-    [48107] = {
-        name = "Heating Up",
-        damageMultiplier = 1.05,
-    },
-
-    [373183] = {
-        name = "Harsh Discipline",
-        damageMultiplier = 1.05,
-    },
-    [202602] = {
-        name = "Into the Fray",
-        damageAddition = 0.05,
-    },
-    [401187] = {
-        name = "Molten Overflow",
-        damageMultiplier = 1.1,
-    },
-
-    [406921] = {
-        name = "Adaptive Stonescales",
-        physicalReductionModifier = 0.05,
-    },
-
-    [124974] = {
-        name = "Nature's Vigil",
-        reductionModifier = 0.05,
-    },
-    [3408] = {
-        name = "Crippling Poison",
-        physicalReductionModifier = 0.1,
-    },
-
-    [391882] = {
-        name = "Apex Predator's Craving",
-        damageMultiplier = 1.1,
-    },
-
-    [129914] = {
-        name = "Power Strikes",
-        damageAddition = 0.05,
-    },
-    [93622] = {
-        name = "Gore",
-        damageMultiplier = 1.05,
-    },
-
-    [383883] = {
-        name = "Fury of the Sun King",
-        damageMultiplier = 1.15,
-    },
-    [102543] = {
-        name = "Incarnation: Avatar of Ashamane",
-        damageMultiplier = 1.2,
-    },
-
-    [383018] = {
-        name = "Stoneskin",
-        physicalReductionModifier = 0.1,
-    },
-
-    [258920] = {
-        name = "Immolation Aura",
-        damageMultiplier = 1.05,
-    },
-    [383997] = {
-        name = "Arcane Tempo",
-        damageMultiplier = 1.02,
-    },
-    [408340] = {
-        name = "Shadows of the Predator",
-        damageAddition = 0.01,
-    },
-    
-    [10060] = {
-        name = "Power Infusion",
-        damageAddition = 1.2, -- 20% haste increase could imply damage increase
-    },
-
-    [264173] = {
-        name = "Demonic Core",
-        damageMultiplier = 1.1, -- 100% reduction in cast time might imply a damage increase
-    },
-    
-    [1022] = {
-        name = "Blessing of Protection",
-        physicalReductionModifier = 1.0, -- Immunity to physical damage
-    },
-    [642] = {
-        name = "Divine Shield",
-        reductionModifier = 1.0, -- Immunity to all damage
-    },
-
-    [47585] = {
-        name = "Dispersion",
-        reductionModifier = 0.25, -- 75% damage reduction
-    },
-    
-    [22812] = {
-        name = "Barkskin",
-        reductionModifier = 0.2, -- 20% damage reduction
-    },
+		[23456] = {
+			["physicalReductionModifier"] = 0.1,
+			["name"] = "Example Spell",
+			["damageMultiplier"] = 1.2,
+			["magicReductionModifier"] = 0.1,
+			["reductionModifier"] = 0.1,
+			["damageAddition"] = 0.1,
+		},
+		[183435] = {
+			["name"] = "Retribution Aura",
+			["damageMultiplier"] = 1.05,
+		},
+		[48107] = {
+			["name"] = "Heating Up",
+			["damageMultiplier"] = 1.05,
+		},
+		[260286] = {
+			["damageAddition"] = 0.02,
+			["name"] = "Tip of the Spear",
+			["damageMultiplier"] = 1,
+		},
+		[216331] = {
+			["name"] = "Avenging Crusader",
+			["damageMultiplier"] = 1.2,
+		},
+		[32182] = {
+			["name"] = "Heroism",
+			["damageAddition"] = 0.2,
+		},
+		[260734] = {
+			["name"] = "Master of the Elements",
+			["damageMultiplier"] = 1.1,
+		},
+		[45438] = {
+			["name"] = "Ice Block",
+			["reductionModifier"] = 1,
+		},
+		[6940] = {
+			["name"] = "Blessing of Sacrifice",
+			["reductionModifier"] = 0.3,
+		},
+		[248622] = {
+			["description"] = "Colossus Smash increases your Haste by 10%, or by 20% if the target is below 35% health. Lasts 10 sec.",
+			["name"] = "In For The Kill",
+			["damageAddition"] = 0.04,
+		},
+		[373183] = {
+			["name"] = "Harsh Discipline",
+			["damageMultiplier"] = 1.05,
+		},
+		[387336] = {
+			["name"] = "Zone of Focus",
+			["reductionModifier"] = 0.05,
+		},
+		[104773] = {
+			["name"] = "Unending Resolve",
+			["reductionModifier"] = 0.25,
+		},
+		[61336] = {
+			["name"] = "Survival Instincts",
+			["reductionModifier"] = 0.5,
+		},
+		[391099] = {
+			["name"] = "Dark Evangelism",
+			["damageMultiplier"] = 1.02,
+		},
+		[264173] = {
+			["name"] = "Demonic Core",
+			["damageMultiplier"] = 1.1,
+		},
+		[122783] = {
+			["name"] = "Diffuse Magic",
+			["magicReductionModifier"] = 0.6,
+		},
+		[258920] = {
+			["name"] = "Immolation Aura",
+			["damageMultiplier"] = 1.05,
+		},
+		[197625] = {
+			["physicalReductionModifier"] = 0.125,
+			["name"] = "Moonkin Form",
+			["damageMultiplier"] = 1.1,
+		},
+		[102543] = {
+			["name"] = "Incarnation: Avatar of Ashamane",
+			["damageMultiplier"] = 1.2,
+		},
+		[114050] = {
+			["name"] = "Ascendance",
+			["damageAddition"] = 0.1,
+		},
+		[315496] = {
+			["damageAddition"] = 0.09,
+			["name"] = "Slice and Dice",
+			["damageMultiplier"] = 1.05,
+		},
+		[42650] = {
+			["description"] = "Summons a legion of ghouls who swarms your enemies, fighting anything they can for 30 sec.",
+			["name"] = "Army of the Dead",
+			["damageAddition"] = 1.15,
+		},
+		[210918] = {
+			["name"] = "Ethereal Form",
+			["damageAddition"] = 0,
+		},
+		[386196] = {
+			["physicalReductionModifier"] = -0.05,
+			["name"] = "Berserker Stance",
+			["damageMultiplier"] = 1.1,
+		},
+		[390978] = {
+			["name"] = "Twist of Fate",
+			["description"] = "After damaging or healing a target below 35% health, gain 5% increased damage and healing for 8 sec.",
+		},
+		[213915] = {
+			["name"] = "Mass Spell Reflection",
+			["magicReductionModifier"] = 1,
+		},
+		[31884] = {
+			["name"] = "Avenging Wrath",
+			["damageMultiplier"] = 1.2,
+		},
+		[102560] = {
+			["name"] = "Incarnation: Chosen of Elune - burst",
+			["damageMultiplier"] = 1.29,
+		},
+		[53480] = {
+			["name"] = "Roar of Sacrifice (pet)",
+			["reductionModifier"] = 0.2,
+		},
+		[196098] = {
+			["damageAddition"] = 0.2,
+			["name"] = "Soul Harvest",
+			["damageMultiplier"] = 1,
+		},
+		[391109] = {
+			["name"] = "Dark Ascension",
+			["damageAddition"] = 0.1,
+			["description"] = "Increases your non-periodic Shadow damage by 25% for 20 sec.\r\n\r\n|cFFFFFFFFGenerates 30 Insanity.|r",
+		},
+		[116267] = {
+			["name"] = "Incanter's Flow",
+			["damageMultiplier"] = 1.02,
+		},
+		[48707] = {
+			["name"] = "Anti-Magic Shell",
+			["magicReductionModifier"] = 0,
+		},
+		[193358] = {
+			["name"] = "Grand Melee",
+			["damageMultiplier"] = 1.05,
+		},
+		[406921] = {
+			["name"] = "Adaptive Stonescales",
+			["physicalReductionModifier"] = 0.05,
+		},
+		[202602] = {
+			["name"] = "Into the Fray",
+			["damageAddition"] = 0.05,
+		},
+		[5217] = {
+			["name"] = "Tiger's Fury",
+			["damageMultiplier"] = 1.15,
+		},
+		[22812] = {
+			["damageAddition"] = 0,
+			["reductionModifier"] = 0.2,
+			["name"] = "Barkskin",
+		},
+		[393919] = {
+			["name"] = "Screams of the Void",
+			["description"] = "Devouring Plague causes your Shadow Word: Pain and Vampiric Touch to deal damage 40% faster on all targets for 3 sec.",
+		},
+		[383018] = {
+			["name"] = "Stoneskin",
+			["physicalReductionModifier"] = 0.1,
+		},
+		[47568] = {
+			["description"] = "Empower your rune weapon, gaining 15% Haste and generating 1 Rune and 5 Runic Power instantly and every 5 sec for 20 sec.\r\n",
+			["name"] = "Empower Rune Weapon",
+			["reductionModifier"] = 1.15,
+		},
+		[5487] = {
+			["name"] = "Bear Form",
+			["physicalReductionModifier"] = 0.3,
+		},
+		[371353] = {
+			["name"] = "Elemental Chaos: Frost",
+			["damageMultiplier"] = 1.05,
+		},
+		[394049] = {
+			["description"] = "Balance of All Things\nInstant",
+			["name"] = "Balance of All Things",
+			["damageAddition"] = 0.03,
+		},
+		[209426] = {
+			["name"] = "Darkness",
+			["reductionModifier"] = 0.5,
+			["damageAddition"] = 0,
+		},
+		[391882] = {
+			["name"] = "Apex Predator's Craving",
+			["damageMultiplier"] = 1.1,
+		},
+		[212295] = {
+			["physicalReductionModifier"] = 0,
+			["name"] = "Nether Ward",
+			["magicReductionModifier"] = 1,
+		},
+		[394050] = {
+			["description"] = "Balance of All Things\nInstant",
+			["name"] = "Balance of All Things",
+			["damageAddition"] = 0.03,
+		},
+		[118038] = {
+			["physicalReductionModifier"] = 0.1,
+			["reductionModifier"] = 0.3,
+			["name"] = "Die by the Sword",
+		},
+		[17] = {
+			["name"] = "Power Word: Shield",
+			["reductionModifier"] = 0.1,
+		},
+		[385126] = {
+			["name"] = "Blessing of Dusk",
+			["description"] = "Damage taken reduced by 5% For 10 sec.",
+		},
+		[93622] = {
+			["name"] = "Gore",
+			["damageAddition"] = 0,
+			["damageMultiplier"] = 1.05,
+		},
+		[23920] = {
+			["name"] = "Spell Reflection",
+			["magicReductionModifier"] = 0.2,
+		},
+		[396092] = {
+			["name"] = "Well Fed",
+			["damageMultiplier"] = 1.03,
+		},
+		[48517] = {
+			["description"] = "Casting 2 Starfires empowers Wrath for 15 sec. Casting 2 Wraths empowers Starfire for 15 sec.\r\n\r\n|T236152:24|t |cffffffffEclipse (Solar)|r\r\nNature spells deal 15% additional damage and Wrath damage is increased by 40%.\r\n\r\n|T236151:24|t |cffffffffEclipse (Lunar)|r\r\nArcane spells deal 15% additional damage and the damage Starfire deals to nearby enemies is increased by 30%.",
+			["name"] = "Eclipse (Solar)",
+			["damageMultiplier"] = 1.15,
+		},
+		[392778] = {
+			["description"] = "Haste increased by 1% and your auto-attack critical strikes increase your auto-attack speed by 10% for 10 sec.",
+			["name"] = "Wild Strikes",
+			["damageAddition"] = 0.01,
+		},
+		[381623] = {
+			["description"] = "Restore 100 Energy. Mastery increased by 4.8% for 6 sec.",
+			["name"] = "Thistle Tea",
+			["damageAddition"] = 0.03,
+		},
+		[47585] = {
+			["name"] = "Dispersion",
+			["reductionModifier"] = 0.75,
+		},
+		[232698] = {
+			["name"] = "Shadowform",
+			["damageMultiplier"] = 1.06,
+		},
+		[3408] = {
+			["name"] = "Crippling Poison",
+			["physicalReductionModifier"] = 0.1,
+		},
+		[12042] = {
+			["name"] = "Arcane Power",
+			["damageMultiplier"] = 1.3,
+		},
+		[86659] = {
+			["name"] = "Guardian of Ancient Kings",
+			["reductionModifier"] = 0.5,
+		},
+		[371172] = {
+			["reductionModifier"] = 0.02,
+			["name"] = "Phial of Tepid Versatility",
+			["damageMultiplier"] = 1.02,
+		},
+		[5277] = {
+			["name"] = "Evasion",
+			["physicalReductionModifier"] = 0.5,
+		},
+		[121164] = {
+			["name"] = "Orb of Power",
+			["damageAddition"] = 0.1,
+		},
+		[408340] = {
+			["name"] = "Shadows of the Predator",
+			["damageAddition"] = 0.01,
+		},
+		[1966] = {
+			["name"] = "Feint",
+			["reductionModifier"] = 0.1,
+		},
+		[129914] = {
+			["name"] = "Power Strikes",
+			["damageAddition"] = 0.05,
+		},
+		[48518] = {
+			["description"] = "Casting 2 Starfires empowers Wrath for 15 sec. Casting 2 Wraths empowers Starfire for 15 sec.\r\n\r\n|T236152:24|t |cffffffffEclipse (Solar)|r\r\nNature spells deal 15% additional damage and Wrath damage is increased by 40%.\r\n\r\n|T236151:24|t |cffffffffEclipse (Lunar)|r\r\nArcane spells deal 15% additional damage and the damage Starfire deals to nearby enemies is increased by 30%.",
+			["name"] = "Eclipse (Lunar)",
+			["damageMultiplier"] = 1.15,
+		},
+		[108271] = {
+			["name"] = "Astral shift",
+			["reductionModifier"] = 0.4,
+		},
+		[287280] = {
+			["name"] = "Glimmer of Light",
+			["damageAddition"] = 0.05,
+		},
+		[31224] = {
+			["name"] = "Cloak of Shadows",
+			["magicReductionModifier"] = 1,
+		},
+		[256735] = {
+			["description"] = "Critical strike chance increased by 30% while Stealthed and for 3 sec after breaking Stealth.",
+			["name"] = "Master Assassin",
+			["damageAddition"] = 0.2,
+		},
+		[345230] = {
+			["name"] = "Gladiator's Insignia",
+			["damageMultiplier"] = 1.1,
+		},
+		[124974] = {
+			["name"] = "Nature's Vigil",
+			["reductionModifier"] = 0.05,
+		},
+		[16166] = {
+			["name"] = "Elemental Mastery - burst",
+			["damageAddition"] = 0.2,
+		},
+		[382079] = {
+			["name"] = "Incarnate's Mark of Frost",
+			["damageMultiplier"] = 1.05,
+		},
+		[382080] = {
+			["name"] = "Incarnate's Mark of Fire",
+			["damageMultiplier"] = 1.05,
+		},
+		[228049] = {
+			["name"] = "Guardian of the Forgotten Queen",
+			["reductionModifier"] = 1,
+		},
+		[19574] = {
+			["name"] = "Bestial Wrath",
+			["damageMultiplier"] = 1.25,
+		},
+		[226807] = {
+			["name"] = "Well Fed",
+			["damageMultiplier"] = 1.03,
+		},
+		[200183] = {
+			["name"] = "Apotheosis",
+			["damageMultiplier"] = 1.3,
+		},
+		[395152] = {
+			["name"] = "Ebon Might",
+			["description"] = "Increase your 4 nearest allies' primary stat by 6.5% of your own, and cause you to deal 20% more damage, for 10 sec.\r\n\r\nMay only affect 4 allies at once, and prefers to imbue damage dealers.\r\n\r\nEruption, Deep Breath, and your empower spells extend the duration of these effects.",
+			["damageMultiplier"] = 1.2,
+		},
+		[198529] = {
+			["name"] = "Plunder Armor",
+			["damageAddition"] = 0.05,
+		},
+		[390581] = {
+			["description"] = "While Bladestorming, every 0.8 sec you gain 5% movement speed and 5% Strength, stacking up to 6 times. Lasts 6 sec. \r\n\r\nBladestorm cannot be canceled while using Hurricane.",
+			["name"] = "Hurricane",
+			["damageAddition"] = 0.05,
+		},
+		[386164] = {
+			["name"] = "Battle Stance",
+			["damageMultiplier"] = 1.03,
+		},
+		[207319] = {
+			["name"] = "Corpse Shield",
+			["reductionModifier"] = 0.9,
+		},
+		[383997] = {
+			["name"] = "Arcane Tempo",
+			["damageMultiplier"] = 1.02,
+		},
+		[175784] = {
+			["name"] = "Well Fed",
+			["damageMultiplier"] = 1.05,
+		},
+		[383269] = {
+			["description"] = "Abomination Limb\n20 yd range\nInstant",
+			["name"] = "Abomination Limb",
+			["reductionModifier"] = 1.15,
+		},
+		[196099] = {
+			["name"] = "Grimoire of Sacrifice",
+			["damageMultiplier"] = 1.1,
+		},
+		[1022] = {
+			["name"] = "Blessing of Protection",
+			["physicalReductionModifier"] = 1,
+		},
+		[204018] = {
+			["name"] = "Blessing of Spellwarding",
+			["magicReductionModifier"] = 1,
+		},
+		[193538] = {
+			["name"] = "Alacrity",
+			["damageMultiplier"] = 1.01,
+		},
+		[257622] = {
+			["damageAddition"] = 0,
+			["name"] = "Trick Shots",
+			["damageMultiplier"] = 1.05,
+		},
+		[198589] = {
+			["physicalReductionModifier"] = 0.2,
+			["reductionModifier"] = 0.2,
+			["name"] = "Blur",
+		},
+		[122278] = {
+			["name"] = "Dampen Harm",
+			["reductionModifier"] = 0.3,
+		},
+		[79140] = {
+			["name"] = "Vendetta",
+			["damageMultiplier"] = 1.3,
+		},
+		[106951] = {
+			["name"] = "Berserk - burst",
+			["damageMultiplier"] = 1.25,
+		},
+		[198144] = {
+			["name"] = "Ice form (pvp)",
+			["damageMultiplier"] = 1.15,
+		},
+		[204288] = {
+			["name"] = "Earth Shield",
+			["reductionModifier"] = 0.1,
+		},
+		[48792] = {
+			["name"] = "Icebound Fortitude",
+			["reductionModifier"] = 0.3,
+		},
+		[90355] = {
+			["name"] = "Ancient Hysteria",
+			["damageAddition"] = 0.2,
+		},
+		[186265] = {
+			["name"] = "Aspect of the Turtle",
+			["reductionModifier"] = 1,
+		},
+		[465] = {
+			["name"] = "Devotion Aura",
+			["reductionModifier"] = 0.03,
+		},
+		[381664] = {
+			["name"] = "Amplifying Poison",
+			["damageMultiplier"] = 1.05,
+		},
+		[382153] = {
+			["name"] = "Well Fed",
+			["damageMultiplier"] = 1.03,
+		},
+		[102342] = {
+			["name"] = "Ironbark",
+			["reductionModifier"] = 0.2,
+		},
+		[12472] = {
+			["name"] = "Icy Veins",
+			["damageAddition"] = 0.14,
+		},
+		[418810] = {
+			["name"] = "Dreamsurge Lone Wolves",
+			["description"] = "Increases damage done, healing done, and movement speed by 25% and decreases damage taken by 25% while not near another player.",
+		},
+		[382154] = {
+			["name"] = "Well Fed",
+			["damageMultiplier"] = 1.05,
+		},
+		[642] = {
+			["name"] = "Divine Shield",
+			["reductionModifier"] = 1,
+		},
+		[10060] = {
+			["name"] = "Power Infusion",
+			["damageAddition"] = 0.2,
+		},
+		[121471] = {
+			["name"] = "Shadow Blades",
+			["damageMultiplier"] = 1.2,
+		},
+		[33206] = {
+			["name"] = "Pain Suppression",
+			["reductionModifier"] = 0.4,
+		},
+		[279709] = {
+			["description"] = "Starsurge and Starfall grant you 2% Haste for 15 sec.\r\n\r\nStacks up to 3 times. Gaining a stack does not refresh the duration.",
+			["name"] = "Starlord",
+			["damageMultiplier"] = 1.02,
+		},
+		[199261] = {
+			["name"] = "Death Wish",
+			["damageAddition"] = 0.1,
+		},
+		[257946] = {
+			["name"] = "Thrill of the Hunt",
+			["damageMultiplier"] = 1.05,
+		},
+		[115176] = {
+			["name"] = "Zen Meditation",
+			["reductionModifier"] = 0.6,
+		},
+		[115192] = {
+			["name"] = "Subterfuge",
+			["description"] = "Your abilities requiring Stealth can still be used for 3 sec after Stealth breaks.",
+		},
+		[31230] = {
+			["name"] = "Cheat Death (cd)",
+			["reductionModifier"] = 0.85,
+		},
+		[418813] = {
+			["name"] = "Self Sufficient",
+			["description"] = "Increases damage done, healing done, and movement speed by 25% and decreases damage taken by 25% while not near another player.",
+		},
+		[498] = {
+			["name"] = "Divine Protection",
+			["reductionModifier"] = 0.2,
+		},
+		[194223] = {
+			["name"] = "Celestial Alignment - burst",
+			["damageMultiplier"] = 1.25,
+		},
+		[107574] = {
+			["name"] = "Avatar",
+			["damageMultiplier"] = 1.2,
+		},
+		[80353] = {
+			["name"] = "Time Warp",
+			["damageMultiplier"] = 1.3,
+		},
+		[264663] = {
+			["name"] = "Predator's Thirst",
+			["reductionModifier"] = 0.1,
+		},
+		[393438] = {
+			["name"] = "Draconic Augmentation",
+			["damageMultiplier"] = 1.04,
+		},
+		[162264] = {
+			["name"] = "Metamorphosis",
+			["damageMultiplier"] = 1.2,
+		},
+		[13750] = {
+			["name"] = "Adrenaline Rush",
+			["damageMultiplier"] = 1.09,
+		},
+		[24858] = {
+			["physicalReductionModifier"] = 0.125,
+			["name"] = "Moonkin Form",
+			["damageMultiplier"] = 1.1,
+		},
+		[391528] = {
+			["name"] = "Convoke the Spirits",
+			["description"] = "Call upon the Night Fae for an eruption of energy, channeling a rapid flurry of 16 Druid spells and abilities over 4 sec.\r\n\r\nYou will cast Wild Growth, Swiftmend, Moonfire, Wrath, Regrowth, Rejuvenation, Rake, and Thrash on appropriate nearby targets, favoring your current shapeshift form.",
+		},
+		[390192] = {
+			["name"] = "Ragefire",
+			["damageMultiplier"] = 1.1,
+		},
+		[224668] = {
+			["name"] = "Crusade",
+			["damageAddition"] = 0,
+		},
+		[374000] = {
+			["name"] = "Iced Phial of Corrupting Rage",
+			["damageMultiplier"] = 1.03,
+		},
+		[196555] = {
+			["name"] = "Netherwalk",
+			["reductionModifier"] = 1,
+		},
+		[33891] = {
+			["physicalReductionModifier"] = 0.2,
+			["name"] = "Incarnation: Tree of Life",
+			["damageMultiplier"] = 1.2,
+		},
+		[386208] = {
+			["name"] = "Defensive Stance",
+			["reductionModifier"] = 0.1,
+		},
+		[356661] = {
+			["name"] = "Chaotic Imprint - Fire",
+			["damageMultiplier"] = 1.1,
+		},
+		[385127] = {
+			["damageAddition"] = 0.05,
+			["name"] = "Blessing of Dawn",
+			["damageMultiplier"] = 1,
+		},
+		[190319] = {
+			["name"] = "Combustion - burst",
+			["damageMultiplier"] = 1.3,
+		},
+		[383883] = {
+			["name"] = "Fury of the Sun King",
+			["damageMultiplier"] = 1.15,
+		},
+		[374002] = {
+			["name"] = "Corrupting Rage",
+			["damageMultiplier"] = 1.03,
+		},
+		[2823] = {
+			["name"] = "Deadly Poison",
+			["damageAddition"] = 0.03,
+		},
+		[401187] = {
+			["name"] = "Molten Overflow",
+			["damageMultiplier"] = 1.1,
+		},
+		[45182] = {
+			["name"] = "Cheating Death",
+			["reductionModifier"] = 0.85,
+		},
+		[1126] = {
+			["name"] = "Mark of the Wild",
+			["damageMultiplier"] = 1.03,
+		},
+		[2825] = {
+			["name"] = "Bloodlust",
+			["damageAddition"] = 0.2,
+		},
+		[395296] = {
+			["description"] = "Ebon Might\nInstant",
+			["name"] = "Ebon Might",
+			["damageAddition"] = 0,
+			["damageMultiplier"] = 1.2,
+		},
+		[160452] = {
+			["name"] = "Netherwinds",
+			["damageAddition"] = 0.2,
+		},
+		[199754] = {
+			["name"] = "Riposte",
+			["physicalReductionModifier"] = 0.2,
+		},
+		[175785] = {
+			["name"] = "Well Fed",
+			["damageMultiplier"] = 1.05,
+		},
+		[1719] = {
+			["name"] = "Battle Cry",
+			["damageMultiplier"] = 1.15,
+		},
+		[871] = {
+			["name"] = "Warrior Shield Wall",
+			["reductionModifier"] = 0.4,
+			["damageMultiplier"] = 1,
+		},
+		[205766] = {
+			["name"] = "Bone Chilling",
+			["damageAddition"] = 0.01,
+			["description"] = "Bone Chilling\nInstant",
+		},
+	
 }
 
--- These are all known spells, even if they have no modifiers. 
 addon.defaultIgnored = {
     [382093] = { 
         name = "Alchemically Inspired", 

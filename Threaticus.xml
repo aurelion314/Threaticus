@@ -1,0 +1,4 @@
+<Ui xmlns="http://www.blizzard.com/wow/ui/">
+    <Frame name="ThreaticusIndicatorTemplate" virtual="true" frameStrata="HIGH" frameLevel="100">
+    </Frame>
+</Ui>
