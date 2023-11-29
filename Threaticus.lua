@@ -128,9 +128,7 @@ function addon:DrawOnPlate(nameplateID, damageModifier, physicalDefensiveModifie
     if not frame then return end
 
     -- Damage Indicator
-    local baseSize = 15
-    local sizeMultiplier = damageModifier
-    local indicatorSize = baseSize + sizeMultiplier
+    local indicatorSize = addon:CalculateDamageIndicatorSize(damageModifier)
     local color = self:getThreatColor(damageModifier)
 
     self:UpdateIndicator(frame, "ThreaticusDamageIndicator", indicatorSize, color, "CENTER", "CENTER", settings.damageIndicator.xOffset, settings.damageIndicator.yOffset, "BlipNormal")
@@ -173,14 +171,15 @@ function addon:UpdateIndicator(frame, indicatorKey, size, color, point1, point2,
     frame[indicatorKey]:Show()
 end
 
+function addon:CalculateDamageIndicatorSize(damageModifier)
+    return ThreaticusDB.settings.damageIndicator.size
+end
+
 function addon:CalculateDefensiveIndicatorSize(defensiveModifier)
-    -- Base size for the indicator
-    local baseSize = 9
+    local baseSize = ThreaticusDB.settings.spellReductionIndicator.size
     return baseSize -- For now lets leave it static
-    -- It should get bigger as it approaches 0, maxing out at 3.0. defensiveModifier is between 0 and 1. 0 being that they are
     -- local sizeMultiplier = ((1 - defensiveModifier)) * 2 * baseSize
-    -- local indicatorSize = baseSize + sizeMultiplier
-    -- return indicatorSize
+    -- return baseSize + sizeMultiplier
 end
 
 

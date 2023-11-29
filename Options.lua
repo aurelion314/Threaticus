@@ -176,6 +176,21 @@ addon.options = {
                                 setOption({"damageIndicator", "yOffset"}, value)
                             end
                         },
+                        size = {
+                            type = 'range',
+                            name = "Size",
+                            desc = "Size of the damage indicator",
+                            min = 5,
+                            max = 50,
+                            step = 1,
+                            order = 3,
+                            get = function()
+                                return getOption({"damageIndicator", "size"})
+                            end,
+                            set = function(_, value)
+                                setOption({"damageIndicator", "size"}, value)
+                            end
+                        },
                         maxValue = {
                             type = 'range',
                             name = "Max Value",
@@ -183,7 +198,7 @@ addon.options = {
                             min = 0,
                             max = 3,
                             step = 0.1,
-                            order = 3,
+                            order = 4,
                             get = function()
                                 return getOption({"damageIndicator", "maxValue"})
                             end,
@@ -242,6 +257,21 @@ addon.options = {
                                 setOption({"spellReductionIndicator", "yOffset"}, value)
                             end
                         },
+                        size = {
+                            type = 'range',
+                            name = "Size",
+                            desc = "Size of the defensive indicators",
+                            min = 5,
+                            max = 50,
+                            step = 1,
+                            order = 3,
+                            get = function()
+                                return getOption({"spellReductionIndicator", "size"})
+                            end,
+                            set = function(_, value)
+                                setOption({"spellReductionIndicator", "size"}, value)
+                            end
+                        },
                         minValue = {
                             type = 'range',
                             name = "Min Value",
@@ -249,7 +279,7 @@ addon.options = {
                             min = 0,
                             max = 1,
                             step = 0.1,
-                            order = 3,
+                            order = 4,
                             get = function()
                                 return getOption({"spellReductionIndicator", "minValue"})
                             end,
@@ -786,17 +816,20 @@ addon.defaultSettings = {
     damageIndicator = {
         xOffset = 50,
         yOffset = 10,
+        size = 15,
         maxValue = 1.5
     },
     spellReductionIndicator = {
         xOffset = 45,
         yOffset = 15,
+        size = 9,
         minValue = 0.6,
         enabled = true,
     },
     physicalReductionIndicator = {
         xOffset = 55,
         yOffset = 15,
+        size = 9,
         minValue = 0.6,
         enabled = true,
     },
