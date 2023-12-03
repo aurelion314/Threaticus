@@ -127,19 +127,7 @@ addon.options = {
             name = "Indicators",
             order = 2,
             args = {
-                testing = {
-                    type = 'toggle',
-                    name = "Test",
-                    desc = "Show the defensive indicators at full alpha",
-                    order = 0,
-                    get = function()
-                        return ThreaticusDB.settings.testing
-                    end,
-                    set = function(_, value)
-                        ThreaticusDB.settings.testing = value
-                        addon:refreshView()
-                    end
-                },
+                
                 damageIndicator = {
                     type = 'group',
                     name = "Damage Indicator",
@@ -208,11 +196,43 @@ addon.options = {
                         }
                     }
                 },
+                testing = {
+                    type = 'toggle',
+                    name = "Test",
+                    desc = "Show the defensive indicators at full alpha and overwrite the damage modifier value",
+                    order = 0,
+                    get = function()
+                        return ThreaticusDB.settings.testing
+                    end,
+                    set = function(_, value)
+                        ThreaticusDB.settings.testing = value
+                        addon:refreshView()
+                    end
+                },
+                testDamageModifier = {
+                    type='range',
+                    name = "Test damage modifier",
+                    desc = "Test the damage modifier value",
+                    min = 1,
+                    max = 3,
+                    step = 0.05,
+                    order = 0,
+                    hidden = function()
+                        return not ThreaticusDB.settings.testing
+                    end,
+                    get = function()
+                        return ThreaticusDB.settings.damageIndicator.testDamageModifier
+                    end,
+                    set = function(_, value)
+                        ThreaticusDB.settings.damageIndicator.testDamageModifier = value
+                        addon:refreshView()
+                    end
+                },
                 spellReductionIndicator = {
                     type = 'group',
                     name = "Magic Defense Indicator",
                     inline = true,
-                    order = 1,
+                    order = 3,
                     args = {
                         enabled = {
                             type = 'toggle',
@@ -293,7 +313,7 @@ addon.options = {
                     type = 'group',
                     name = "Physical Defense Indicator",
                     inline = true,
-                    order = 1,
+                    order = 4,
                     args = {
                         enabled = {
                             type = 'toggle',
@@ -374,13 +394,25 @@ addon.options = {
                             fontSize = 'medium',
                             order = 0,
                         }, 
+                        listSize = {
+                            type = 'description',
+                            name = function()
+                                local msg = "Unknown Spells: " .. (ThreaticusDB.unknownSpells and addon:GetTableSize(ThreaticusDB.unknownSpells) or 0)
+                                if addon:GetTableSize(ThreaticusDB.unknownSpells) > 100 then
+                                    msg = msg .. "(Large!)"
+                                end
+                                return msg
+                            end,
+                            fontSize = 'medium',
+                            order = 1,
+                        },
                         refresh = {
                             type = 'execute',
                             name = "Refresh",
                             func = function()
                                 addon:generateUnknownSpellList()
                             end,
-                            order = 1,
+                            order = 2,
                             width = 'half',
                         },
                         clear = {
@@ -390,7 +422,7 @@ addon.options = {
                                 addon:clearTable(ThreaticusDB.unknownSpells)
                                 addon:generateUnknownSpellList()
                             end,
-                            order = 2,
+                            order = 3,
                             width = 'half',
                         },
                         -- Dynamic content based on `unknownSpells` will be added here
@@ -498,7 +530,7 @@ function addon:generateUnknownSpellList()
     local unknownSpellsSection = addon.options.args.spellManagement.args.unknownSpellsSection.args
     -- Clear the existing options except for clear and refresh buttons
     for k in pairs(unknownSpellsSection) do 
-        if k ~= "refresh" and k ~= "clear" and k ~= "description" then
+        if k ~= "refresh" and k ~= "clear" and k ~= "description" and k ~= "listSize" then
             unknownSpellsSection[k] = nil
         end
     end
@@ -580,9 +612,19 @@ function addon:generateSpellManagementOptions()
         for spellId, spellData in pairs(ThreaticusDB.trackedSpells) do
             local shouldAddSpell = not isClassFilterActive -- Add spell by default if no filter is active
 
-            local flags, providers, modifiedSpells, moreFlags = LibPlayerSpells:GetSpellInfo(spellId)
-            if flags then
-                if isClassFilterActive then
+            if isClassFilterActive then
+                 -- Since the DB is old, check if we set the class attribute in spellData.
+                if spellData.class then
+                    for class, _ in pairs(addon.classFilters) do
+                        if string.lower(spellData.class) == string.lower(class) then
+                            shouldAddSpell = true
+                            break
+                        end
+                    end
+                end
+                -- Otherwise check DB library
+                local flags, providers, modifiedSpells, moreFlags = LibPlayerSpells:GetSpellInfo(spellId)
+                if flags then
                     for class, _ in pairs(addon.classFilters) do
                         if activeClassFilters[class] then
                             local classFlag = LibPlayerSpells.constants[class]
@@ -593,6 +635,7 @@ function addon:generateSpellManagementOptions()
                         end
                     end
                 end
+                
             end
             -- check if it is missing modifies:
             if missingModifierFilter then
@@ -676,6 +719,14 @@ function addon:generateSpellManagementOptions()
                     name = "Spell Information",
                     order = 0,
                 },
+                spellId = {
+                    type = 'description',
+                    name = function()
+                        return "Spell ID: " .. (addon.selectedSpellId or "N/A")
+                    end,
+                    fontSize = 'medium',
+                    order = 1,
+                },
                 spellDescription = {
                     type = 'description',
                     name = function()
@@ -757,6 +808,39 @@ function addon:generateSpellManagementOptions()
                     get = function() return ThreaticusDB.trackedSpells[addon.selectedSpellId].physicalReductionModifier end,
                     set = function(_, value) ThreaticusDB.trackedSpells[addon.selectedSpellId].physicalReductionModifier = tonumber(value) end,
                 },
+                duration = {
+                    type = 'range',
+                    name = "Duration",
+                    desc = "This is only used for non buffs. Estimated duration of the spell in seconds",
+                    min = 0,max = 60,step = 1,
+                    order = 7,
+                    get = function() return ThreaticusDB.trackedSpells[addon.selectedSpellId].duration end,
+                    set = function(_, value) ThreaticusDB.trackedSpells[addon.selectedSpellId].duration = tonumber(value) end,
+                },
+                class = {
+                    type = 'select',
+                    name = "Class",
+                    desc = "Class that this spell is used by. Used for filtering when class is unknown",
+                    order = 8,
+                    values = {
+                        DRUID = "Druid",
+                        MAGE = "Mage",
+                        PALADIN = "Paladin",
+                        PRIEST = "Priest",
+                        ROGUE = "Rogue",
+                        SHAMAN = "Shaman",
+                        WARLOCK = "Warlock",
+                        WARRIOR = "Warrior",
+                        DEATHKNIGHT = "Death Knight",
+                        HUNTER = "Hunter",
+                        MONK = "Monk",
+                        DEMONHUNTER = "Demon Hunter",
+                        EVOKER = "Evoker",
+                    },
+                    get = function() return ThreaticusDB.trackedSpells[addon.selectedSpellId].class end,
+                    set = function(_, value) ThreaticusDB.trackedSpells[addon.selectedSpellId].class = value end,
+
+                },
                 ignore = {
                     type = 'execute',
                     name = "Move to Ignored",
@@ -812,12 +896,29 @@ function addon:sortSpellList(list)
     return list
 end
 
+function addon:clearTable(table)
+    for k in pairs(table) do
+        table[k] = nil
+    end
+end
+
+function addon:GetTableSize(tbl)
+    local count = 0
+    if tbl then
+        for _ in pairs(tbl) do
+            count = count + 1
+        end
+    end
+    return count
+end
+
 addon.defaultSettings = {
     damageIndicator = {
         xOffset = 50,
         yOffset = 10,
         size = 15,
-        maxValue = 1.5
+        maxValue = 1.5,
+        testDamageModifier = 1,
     },
     spellReductionIndicator = {
         xOffset = 45,
@@ -837,11 +938,6 @@ addon.defaultSettings = {
     showDebug = false
 }
 
-function addon:clearTable(table)
-    for k in pairs(table) do
-        table[k] = nil
-    end
-end
 
 function addon:ApplyDefaultSettings()
     -- Set default settings

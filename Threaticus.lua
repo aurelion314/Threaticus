@@ -1,5 +1,6 @@
 local addonName, addon = ...
 local settings = {}  -- gets set in Initialize
+local activeSpells = {}
 
 addon.frame = CreateFrame("Frame")
 addon.frame:RegisterEvent("ADDON_LOADED")
@@ -82,18 +83,19 @@ end
 
 
 function addon:ScanUnitBuffs(unitID)
+    local guid = UnitGUID(unitID)
     local relevantBuffs = {}
+    local spellIdsFound = {}  -- Table to track which spell IDs have been found
     local i = 1
     while UnitBuff(unitID, i) do
         local name, _, count, _, _, _, _, _, _, spellId = UnitBuff(unitID, i)
         -- Check if spell is relevant
         if ThreaticusDB.trackedSpells[spellId] then
-            if count == 0 then
-                count = 1
-            end
+            if count == 0 then count = 1 end
             -- add count of them 
             for _ = 1, count do
                 table.insert(relevantBuffs, spellId)
+                spellIdsFound[spellId] = true  -- Mark this spell ID as found
             end
         end
 
@@ -110,6 +112,16 @@ function addon:ScanUnitBuffs(unitID)
             end 
         end
         i = i + 1
+    end
+
+    -- Check for non-buff DPS spells
+    local relevantSpells = activeSpells[guid] or {}
+    for _, spellCastData in ipairs(relevantSpells) do
+        local spellId = spellCastData.spellId
+        if ThreaticusDB.trackedSpells[spellId] and not spellIdsFound[spellId] then
+            addon:Debug("Found non-buff spell: " .. spellId)
+            table.insert(relevantBuffs, spellId)
+        end
     end
 
     local totalDamageModifier = self:CalculateTotalDamageModifier(relevantBuffs)
@@ -239,6 +251,10 @@ function addon:getThreatColor(damageModifier)
         return {1, 0, 0, 1} -- Return a default color (red) if maxValue is not greater
     end
 
+    if ThreaticusDB.settings.testing then
+        damageModifier = ThreaticusDB.settings.damageIndicator.testDamageModifier
+    end
+
     -- Normalize damageModifier within the range of minValue and maxValue
     local normalizedModifier = (damageModifier - minValue) / (maxValue - minValue)
 
@@ -271,6 +287,55 @@ function addon:clearAllPlates()
     end
 end
 
+function addon:CleanupExpiredSpells()
+    local currentTime = GetTime()
+
+    for guid, spells in pairs(activeSpells) do
+        local i = 1
+        while i <= #spells do
+            local spellCastData = spells[i]
+            if currentTime > (spellCastData.timestamp + spellCastData.duration) then
+                -- Spell expired, remove it
+                table.remove(spells, i)
+                addon:Debug("Removed expired spell: " .. spellCastData.spellId)
+            else
+                -- Only increment if we didn't remove a spell (as that shifts the array)
+                i = i + 1
+            end
+        end
+    end
+end
+
+function addon:StartCleanupTimer()
+    self.cleanupTimer = C_Timer.NewTicker(1, function() 
+        self:CleanupExpiredSpells()
+    end)
+end
+
+function addon:COMBAT_LOG_EVENT_UNFILTERED()
+    local _, eventType, _, sourceGUID, sourceName, _, _, destGUID, destName, _, _, spellId, spellName = CombatLogGetCurrentEventInfo()
+
+    if eventType == "SPELL_CAST_SUCCESS" then
+        -- Check if the spell is one that you're interested in
+        if ThreaticusDB.trackedSpells[spellId] then
+            -- Store the spell cast along with the source GUID
+            activeSpells[sourceGUID] = activeSpells[sourceGUID] or {}
+            local duration = ThreaticusDB.trackedSpells[spellId].duration or 0
+            table.insert(activeSpells[sourceGUID], {spellId = spellId, timestamp = GetTime(), duration = duration})
+            addon:Debug("Added spell: " .. spellId)
+        else
+            if not ThreaticusDB.unknownSpells[spellId] and not ThreaticusDB.trackedSpells[spellId] and not ThreaticusDB.ignoredSpells[spellId] then
+                -- Add to spell list for review. This will be used to populate the default table
+                local spellDescription = addon:GetSpellDescription(spellId)
+                ThreaticusDB.unknownSpells[spellId] = { name = spellName, description = spellDescription }
+                addon:Debug("New buff found: " .. spellName .. " (ID: " .. spellId .. ")")
+            elseif ThreaticusDB.unknownSpells[spellId] and (ThreaticusDB.trackedSpells[spellId] or ThreaticusDB.ignoredSpells[spellId]) then
+                -- It is already in known. It shouldn't be in spell list. 
+                ThreaticusDB.unknownSpells[spellId] = nil
+            end 
+        end
+    end
+end
 
 function addon:NAME_PLATE_UNIT_ADDED(unitID)
     addon.alwaysOn = true  -- Test
@@ -302,8 +367,6 @@ function addon:UNIT_AURA(unitID)
     end
 end
 
-
-
 function addon:refreshView()
     -- get all visible nameplates
     local nameplates = C_NamePlate.GetNamePlates()
@@ -317,8 +380,6 @@ function addon:refreshView()
         end
     end
 end
-
-
 
 -- Initialization
 local function Initialize()
@@ -340,9 +401,12 @@ local function Initialize()
     end
  
     -- Initialization logic here (e.g., setting up saved variables, default settings)
+    addon.frame:RegisterEvent('COMBAT_LOG_EVENT_UNFILTERED')
     addon.frame:RegisterEvent('NAME_PLATE_UNIT_ADDED')
     addon.frame:RegisterEvent('NAME_PLATE_UNIT_REMOVED')
     addon.frame:RegisterEvent('UNIT_AURA')
+
+    addon:StartCleanupTimer()
 end
 
 -- Setting up the event script
@@ -351,6 +415,8 @@ addon.frame:SetScript("OnEvent", function(self, event, ...)
         Initialize()
     elseif event == "PLAYER_LOGIN" then
         -- Additional login logic if needed
+    elseif event == "COMBAT_LOG_EVENT_UNFILTERED" then
+        addon:COMBAT_LOG_EVENT_UNFILTERED(...)
     elseif event == "NAME_PLATE_UNIT_ADDED" then
         addon:NAME_PLATE_UNIT_ADDED(...)
     elseif event == "NAME_PLATE_UNIT_REMOVED" then
